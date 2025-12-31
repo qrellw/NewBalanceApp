@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BalanceApp.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+        x:Class="BalanceApp.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="BalanceApp - Ứng Dụng Đánh Giá Thăng Bằng">
+
+    <Design.DataContext>
+        <vm:MainViewModel/>
+    </Design.DataContext>
+
+    <SplitView IsPaneOpen="{Binding IsPaneOpen}"
+               OpenPaneLength="250"
+               CompactPaneLength="50"
+               DisplayMode="CompactInline"
+               Background="#FAFAFA"
+               PaneBackground="#F0F0F0">
+        
+        <SplitView.Pane>
+            <Grid RowDefinitions="Auto, *">
+                <Button Command="{Binding TogglePaneCommand}"
+                        HorizontalAlignment="Left"
+                        Width="50" Height="50"
+                        Background="Transparent"
+                        Margin="0,10,0,0">
+                    <icons:MaterialIcon Kind="Menu" Width="24" Height="24" Foreground="#333"/>
+                </Button>
+
+                <StackPanel Grid.Row="1" Margin="0,20,0,0" Spacing="5">
+                    <!-- Patient Menu Item -->
+                    <Button Command="{Binding GoToPatientsCommand}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Padding="12"
+                            Background="Transparent"
+                            BorderThickness="0">
+                        <Grid ColumnDefinitions="30, *">
+                            <!-- <icons:MaterialIcon Kind="AccountMultiple" Width="24" Height="24" Foreground="#555"/> -->
+                            <TextBlock Text="👤" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Bệnh Nhân" VerticalAlignment="Center" Margin="10,0,0,0"
+                                       IsVisible="{Binding IsPaneOpen}" FontWeight="Medium"/>
+                        </Grid>
+                    </Button>
+
+                    <!-- Measurement Menu Item -->
+                    <Button Command="{Binding GoToMeasurementCommand}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Left"
+                            Padding="12"
+                            Background="Transparent"
+                            BorderThickness="0">
+                        <Grid ColumnDefinitions="30, *">
+                            <!-- <icons:MaterialIcon Kind="ChartLine" Width="24" Height="24" Foreground="#555"/> -->
+                            <TextBlock Text="📈" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="Đo Đạc &amp; Đồ Thị" VerticalAlignment="Center" Margin="10,0,0,0"
+                                       IsVisible="{Binding IsPaneOpen}" FontWeight="Medium"/>
+                        </Grid>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </SplitView.Pane>
+
+        <SplitView.Content>
+            <TransitioningContentControl Content="{Binding CurrentView}" Margin="20"/>
+        </SplitView.Content>
+    </SplitView>
+
+</Window>

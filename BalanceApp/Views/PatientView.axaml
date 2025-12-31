@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BalanceApp.ViewModels"
+             xmlns:models="using:BalanceApp.Models"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="BalanceApp.Views.PatientView"
+             x:DataType="vm:PatientViewModel">
+  
+  <Grid RowDefinitions="Auto, 50, *">
+      
+      <!-- Header -->
+      <Border Grid.Row="0" Margin="0,0,0,10" BorderBrush="#E0E0E0" BorderThickness="0,0,0,1">
+          <Grid ColumnDefinitions="*, Auto, Auto, Auto">
+              <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="20,10" VerticalAlignment="Center"/>
+              
+              <!-- Quick Add Inputs -->
+              <!-- Add Patient Button -->
+              <Button Grid.Column="3" Click="OpenAddPatient_Click" Margin="20" Classes="Accent" Background="#2196F3" Foreground="White">
+                  <StackPanel Orientation="Horizontal" Spacing="5">
+                      <TextBlock Text="Thêm Bệnh Nhân"/>
+                  </StackPanel>
+              </Button>
+          </Grid>
+
+      </Border>
+
+      <!-- Search Bar -->
+      <StackPanel Grid.Row="1" Margin="20,0" Spacing="5">
+          <TextBox Text="{Binding SearchText}" Watermark="Tìm kiếm theo Tên hoặc SĐT..." Width="300" HorizontalAlignment="Left"/>
+          <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap"/>
+      </StackPanel>
+
+      <!-- DataGrid -->
+      <DataGrid Grid.Row="2" Margin="20" ItemsSource="{Binding Patients}"
+                SelectedItem="{Binding SelectedPatientInGrid}"
+                IsReadOnly="True"
+                GridLinesVisibility="All"
+                BorderThickness="1" BorderBrush="Gray">
+          <DataGrid.Columns>
+              <DataGridTextColumn Header="Mã BA" Binding="{Binding MedicalId}" Width="Auto"/>
+              <DataGridTextColumn Header="Họ và Tên" Binding="{Binding FullName}" Width="*"/>
+              <DataGridTextColumn Header="Địa Chỉ" Binding="{Binding Address}" Width="250"/>
+              <DataGridTextColumn Header="Ngày Sinh" Binding="{Binding DateOfBirth, StringFormat={}{0:dd/MM/yyyy}}" Width="Auto"/>
+              <DataGridTextColumn Header="Giới Tính" Binding="{Binding Gender}" Width="Auto"/>
+              <DataGridTextColumn Header="SĐT" Binding="{Binding PhoneNumber}" Width="Auto"/>
+              
+                  <DataGridTemplateColumn Header="Hành Động" Width="Auto">
+                      <DataGridTemplateColumn.CellTemplate>
+                          <DataTemplate DataType="models:Patient">
+                              <StackPanel Orientation="Horizontal" Spacing="5">
+                                  <Button Content="Chọn" 
+                                          Command="{Binding $parent[UserControl].((vm:PatientViewModel)DataContext).SelectPatientCommand}"
+                                          CommandParameter="{Binding}"
+                                          Classes="Success"/>
+                                  <Button Command="{Binding $parent[UserControl].((vm:PatientViewModel)DataContext).DeletePatientCommand}"
+                                  CommandParameter="{Binding}"
+                                  Content="Xóa" Background="Red" Foreground="White"/>
+                          
+                          <Button Command="{Binding $parent[UserControl].((vm:PatientViewModel)DataContext).ViewHistoryCommand}"
+                                  CommandParameter="{Binding}"
+                                  Content="Lịch Sử" Background="#2196F3" Foreground="White"/>
+                      </StackPanel>
+                          </DataTemplate>
+                      </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+          </DataGrid.Columns>
+      </DataGrid>
+  </Grid>
+</UserControl>

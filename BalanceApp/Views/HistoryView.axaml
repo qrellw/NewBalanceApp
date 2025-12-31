@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:BalanceApp.ViewModels"
+             xmlns:sp="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
+             mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
+             x:Class="BalanceApp.Views.HistoryView"
+             x:DataType="vm:HistoryViewModel">
+
+    <Grid RowDefinitions="Auto, *">
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#f0f0f0" Padding="15" BorderBrush="#ddd" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" Spacing="20">
+                <Button Command="{Binding GoBackCommand}" Content="← Quay Lại" Width="100"/>
+                <TextBlock Text="{Binding PatientName, StringFormat='Lịch Sử Đo: {0}'}" 
+                           FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Content Split View -->
+        <Grid Grid.Row="1" ColumnDefinitions="300, *">
+            
+            <!-- Left: Session List -->
+            <Border Grid.Column="0" BorderBrush="#ddd" BorderThickness="0,0,1,0" Background="#fafafa">
+                <ListBox ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="5">
+                                <TextBlock Text="{Binding TestDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="Gray" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <!-- Right: Graph Detail -->
+            <Grid Grid.Column="1" Background="White">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" Margin="10">
+                    <TextBlock Text="Chi Tiết Buổi Đo" FontSize="16" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding SelectedSession.TestDate, StringFormat='Ngày: {0:dd/MM/yyyy HH:mm}'}" 
+                               IsVisible="{Binding SelectedSession, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                </StackPanel>
+
+                <sp:AvaPlot Name="HistoryPlot" Grid.Row="1"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

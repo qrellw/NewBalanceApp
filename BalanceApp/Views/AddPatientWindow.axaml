@@ -1,0 +1,126 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:BalanceApp.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="700"
+        Width="500" Height="700"
+        x:Class="BalanceApp.Views.AddPatientWindow"
+        x:DataType="vm:PatientViewModel"
+        Title="Thêm Bệnh Nhân Mới"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+    
+    <Window.Styles>
+        <Style Selector="DatePickerPresenter ComboBox">
+            <Setter Property="Width" Value="103"/> 
+            
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            
+            <Setter Property="Margin" Value="2,0"/>
+        </Style>
+    </Window.Styles>
+ 
+    <Border Padding="20">
+        <Grid RowDefinitions="*, Auto">
+            
+            <ScrollViewer Grid.Row="0">
+                <StackPanel Spacing="15" Margin="0,0,15,0">
+                    <TextBlock Text="Thông Tin Bệnh Nhân" FontSize="20" FontWeight="Bold" Foreground="#2196F3" Margin="0,0,0,10"/>
+
+                    <!-- Mã Bệnh Án -->
+                    <StackPanel>
+                        <TextBlock Text="Mã Bệnh Án" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding NewPatientMedicalId}" Watermark="Nhập mã bệnh án"/>
+                    </StackPanel>
+
+                    <!-- Họ và Tên -->
+                    <StackPanel>
+                        <TextBlock Text="Họ và Tên (*)" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding NewPatientName}" Watermark="Nhập họ và tên đầy đủ"/>
+                    </StackPanel>
+
+                    <!-- Ngày Sinh -->
+                    <StackPanel>
+                        <TextBlock Text="Ngày Sinh" FontWeight="SemiBold"/>
+                        <DatePicker SelectedDate="{Binding NewPatientDob}" Width="320" HorizontalAlignment="Left" MonthFormat="MM"/>
+                    </StackPanel>
+
+                    <!-- Giới Tính & Dân Tộc -->
+                    <Grid ColumnDefinitions="*, 10, *">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Giới Tính" FontWeight="SemiBold"/>
+                            <ComboBox ItemsSource="{Binding GenderOptions}" SelectedItem="{Binding NewPatientGender}" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Dân Tộc" FontWeight="SemiBold"/>
+                            <AutoCompleteBox ItemsSource="{Binding Ethnicities}" 
+                                             SelectedItem="{Binding SelectedEthnicity}" 
+                                             FilterMode="Contains"
+                                             Watermark="Chọn hoặc nhập..."/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Chiều cao & Cân nặng -->
+                    <Grid ColumnDefinitions="*, 10, *">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Chiều cao (cm)" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding NewPatientHeight}" Watermark="Ví dụ: 170"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Cân nặng (kg)" FontWeight="SemiBold"/>
+                            <TextBox Text="{Binding NewPatientWeight}" Watermark="Ví dụ: 65"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Nghề Nghiệp -->
+                    <StackPanel>
+                        <TextBlock Text="Nghề Nghiệp" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding NewPatientJob}" Watermark="Nhập nghề nghiệp"/>
+                    </StackPanel>
+
+                    <!-- SĐT -->
+                    <StackPanel>
+                        <TextBlock Text="Số Điện Thoại" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding NewPatientPhone}" Watermark="Nhập số điện thoại"/>
+                    </StackPanel>
+
+                    <!-- Địa Chỉ Chi Tiết (Hierarchical) -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Địa Chỉ Cư Trú" FontWeight="SemiBold"/>
+                        
+                        <Grid ColumnDefinitions="*, 10, *">
+                             <AutoCompleteBox Grid.Column="0" ItemsSource="{Binding Provinces}" 
+                                              SelectedItem="{Binding SelectedProvince}" 
+                                              Watermark="Tỉnh/Thành Phố" FilterMode="Contains"/>
+                                              
+                             <AutoCompleteBox Grid.Column="2" ItemsSource="{Binding Districts}" 
+                                              SelectedItem="{Binding SelectedDistrict}" 
+                                              Watermark="Quận/Huyện" FilterMode="Contains"/>
+                        </Grid>
+                        
+                        <Grid ColumnDefinitions="*, 10, *">
+                             <AutoCompleteBox Grid.Column="0" ItemsSource="{Binding Wards}" 
+                                              SelectedItem="{Binding SelectedWard}" 
+                                              Watermark="Phường/Xã" FilterMode="Contains"/>
+                             <!-- Is there a Street field? Yes used newPatientAddress for specific -->
+                             <TextBox Grid.Column="2" Text="{Binding NewPatientAddress}" Watermark="Số nhà, đường..."/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Tiền sử -->
+                    <StackPanel>
+                        <TextBlock Text="Tiền Sử Bệnh Lý" FontWeight="SemiBold"/>
+                        <TextBox Text="{Binding NewPatientHistory}" Height="80" AcceptsReturn="True" TextWrapping="Wrap" Watermark="Mô tả tiền sử bệnh..."/>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,20,0,0">
+                <Button Content="Hủy Bỏ" Click="Cancel_Click" Background="Gray" Foreground="White" Width="100" HorizontalContentAlignment="Center"/>
+                <Button Content="LƯU HỒ SƠ" Command="{Binding AddPatientCommand}" CommandParameter="{Binding $parent[Window]}" Classes="Success" Background="#4CAF50" Foreground="White" FontWeight="Bold" Width="120" HorizontalContentAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
