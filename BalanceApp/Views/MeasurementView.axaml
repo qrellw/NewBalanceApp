@@ -8,62 +8,68 @@
              x:Class="BalanceApp.Views.MeasurementView"
              x:DataType="vm:MeasurementViewModel">
   
-  <Grid RowDefinitions="Auto, Auto, *">
+  <Grid Classes="Page" RowDefinitions="Auto, *">
       
-      <!-- Top Bar: Patient Info -->
-      <Border Grid.Row="0" Background="#E3F2FD" Padding="20" BorderBrush="#2196F3" BorderThickness="0,0,0,2">
+      <!-- Control Bar (Patient + Actions + Status) -->
+      <Border Grid.Row="0" Classes="Card" Margin="0,0,0,12" Padding="12">
           <Grid ColumnDefinitions="Auto, *, Auto">
-              <StackPanel Orientation="Vertical">
-                  <TextBlock Text="ĐANG ĐO CHO BỆNH NHÂN:" FontSize="12" Foreground="Gray"/>
-                  <TextBlock Text="{Binding MainContext.SelectedPatientName}" FontSize="20" FontWeight="Bold" Foreground="#0D47A1"/>
+              <!-- Left: Patient Info -->
+              <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+                  <StackPanel Spacing="2">
+                      <TextBlock Text="Bệnh Nhân" Classes="SectionHeader" Margin="0" FontSize="12"/>
+                      <TextBlock Text="{Binding MainContext.SelectedPatientName, TargetNullValue='Chưa chọn'}" 
+                                 FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource AccentBrush}"/>
+                  </StackPanel>
+                  
+                  <!-- Separator -->
+                  <Border Width="1" Height="24" Background="#E0E0E0" Margin="8,0"/>
+
+                  <!-- Actions (Moved here) -->
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                       <Button Command="{Binding StartStopMeasurementCommand}" 
+                               Content="{Binding ActionButtonText}"
+                               Classes="Accent" Padding="20,6"
+                               IsEnabled="{Binding CanStart}"/>
+                       
+                       <Button Command="{Binding ToggleSimulationCommand}"
+                               Content="Giả lập"
+                               Background="Transparent" BorderBrush="#D0D0D0" BorderThickness="1" CornerRadius="4" Padding="12,6"/>
+                  </StackPanel>
               </StackPanel>
 
-              <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="20,0"
-                         Text="{Binding ConnectionStatus}" Foreground="Green" FontWeight="SemiBold"/>
-              
-              
-              <!-- Sensor Status (Simplified) -->
-              <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10">
-                  <!-- Only show Retry button if failed -->
-                  <Button Command="{Binding ScanDevicesCommand}" 
-                          Content="Kết Nối Lại"
-                          IsVisible="{Binding !IsConnected}"
-                          Classes="accent"/>
-                  
-                  <!-- Connection Indicator -->
-                  <Border CornerRadius="10" Width="20" Height="20" Margin="10,0,0,0"
-                          Classes.connected="{Binding IsConnected}"
-                          ToolTip.Tip="{Binding ConnectionStatus}">
-                      <Border.Styles>
-                          <Style Selector="Border">
-                              <Setter Property="Background" Value="Red"/> <!-- Default/Disconnected -->
-                          </Style>
-                          <Style Selector="Border.connected">
-                              <Setter Property="Background" Value="LimeGreen"/>
-                          </Style>
-                      </Border.Styles>
-                  </Border>
+              <!-- Right: Device Status -->
+              <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                   <StackPanel Spacing="2" HorizontalAlignment="Right">
+                       <TextBlock Text="Thiết Bị" Classes="SectionHeader" Margin="0" FontSize="12" HorizontalAlignment="Right"/>
+                       <StackPanel Orientation="Horizontal" Spacing="6">
+                           <TextBlock Text="{Binding ConnectionStatus}" Foreground="#4CAF50" FontWeight="Medium" FontSize="14"/>
+                           <!-- Indicator -->
+                           <Border Width="10" Height="10" CornerRadius="5" Margin="0,5,0,0"
+                                   Classes.connected="{Binding IsConnected}">
+                               <Border.Styles>
+                                   <Style Selector="Border">
+                                       <Setter Property="Background" Value="#F44336"/> 
+                                   </Style>
+                                   <Style Selector="Border.connected">
+                                       <Setter Property="Background" Value="#4CAF50"/>
+                                   </Style>
+                               </Border.Styles>
+                           </Border>
+                       </StackPanel>
+                   </StackPanel>
+                   
+                   <Button Command="{Binding ScanDevicesCommand}"
+                           Content="Kết nối" FontSize="11" Padding="8,4" 
+                           IsVisible="{Binding !IsConnected}" Classes="Accent" VerticalAlignment="Center"/>
               </StackPanel>
           </Grid>
       </Border>
       
-      <!-- Action Bar -->
-      <Border Grid.Row="1" Background="#F5F5F5" Padding="10">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-               <Button Command="{Binding StartStopMeasurementCommand}" 
-                          Content="{Binding ActionButtonText}"
-                          Background="#F44336" Foreground="White" FontWeight="Bold" Padding="20,10"
-                          IsEnabled="{Binding CanStart}"/>
-               
-               <Button Command="{Binding ToggleSimulationCommand}"
-                       Content="Giả Lập"
-                       Classes="outline"/>
-          </StackPanel>
+      <!-- Main Content (Graph Only) -->
+      <Border Grid.Row="1" Classes="Card" Padding="0">
+          <Grid Margin="16">
+              <sp:AvaPlot Name="BalancePlot" />
+          </Grid>
       </Border>
-
-      <!-- Main Graph Area -->
-      <Grid Grid.Row="2" Background="White" Margin="10">
-          <sp:AvaPlot Name="BalancePlot" />
-      </Grid>
   </Grid>
 </UserControl>

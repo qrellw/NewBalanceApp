@@ -8,66 +8,92 @@
         x:Class="BalanceApp.Views.MainWindow"
         x:DataType="vm:MainViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="BalanceApp - Ứng Dụng Đánh Giá Thăng Bằng">
+        Title="BalanceApp"
+        Background="{StaticResource AppBackgroundBrush}"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="PreferSystemChrome"
+        ExtendClientAreaTitleBarHeightHint="40">
 
     <Design.DataContext>
         <vm:MainViewModel/>
     </Design.DataContext>
 
-    <SplitView IsPaneOpen="{Binding IsPaneOpen}"
-               OpenPaneLength="250"
-               CompactPaneLength="50"
-               DisplayMode="CompactInline"
-               Background="#FAFAFA"
-               PaneBackground="#F0F0F0">
+    <!-- Main Container -->
+    <Grid RowDefinitions="Auto, *">
+        <!-- Custom Title Bar Background (Solid) -->
+        <Border Grid.Row="0" Height="40" Background="Transparent" IsHitTestVisible="False"/>
+
+        <SplitView Grid.Row="1" Grid.RowSpan="1" Margin="0,-40,0,0"
+                   IsPaneOpen="{Binding IsPaneOpen}"
+                   OpenPaneLength="260"
+                   CompactPaneLength="56"
+                   DisplayMode="CompactInline"
+                   Background="{StaticResource AppBackgroundBrush}"
+                   PaneBackground="#F0F0F0"> 
+            
+            <SplitView.Pane>
+                <Grid RowDefinitions="40, *">
+                    <!-- Title Bar Drag Region in Pane -->
+                    <Border Grid.Row="0" Background="Transparent" />
+                    
+                    <StackPanel Grid.Row="1" Spacing="5" Margin="5">
+                        <!-- Toggle Button -->
+                        <Button Command="{Binding TogglePaneCommand}"
+                                HorizontalAlignment="Left"
+                                Width="46" Height="40"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Margin="0,0,0,10">
+                            <icons:MaterialIcon Kind="Menu" Width="20" Height="20" Foreground="#505050"/>
+                        </Button>
+
+                        <!-- Patient Menu Item -->
+                        <Button Command="{Binding GoToPatientsCommand}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Height="40"
+                                Padding="12,0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                CornerRadius="4">
+                            <Grid ColumnDefinitions="30, *">
+                                <icons:MaterialIcon Kind="AccountOutline" Width="20" Height="20" Foreground="#505050" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Bệnh Nhân" VerticalAlignment="Center" Margin="10,0,0,0"
+                                           IsVisible="{Binding IsPaneOpen}" FontWeight="Medium" Foreground="#333"/>
+                            </Grid>
+                        </Button>
+
+                        <!-- Measurement Menu Item -->
+                        <Button Command="{Binding GoToMeasurementCommand}"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Left"
+                                Height="40"
+                                Padding="12,0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                CornerRadius="4">
+                            <Grid ColumnDefinitions="30, *">
+                                <icons:MaterialIcon Kind="ChartBoxOutline" Width="20" Height="20" Foreground="#505050" VerticalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="Đo Đạc &amp; Đồ Thị" VerticalAlignment="Center" Margin="10,0,0,0"
+                                           IsVisible="{Binding IsPaneOpen}" FontWeight="Medium" Foreground="#333"/>
+                            </Grid>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </SplitView.Pane>
+
+            <SplitView.Content>
+                 <!-- Add Top Padding for TitleBar -->
+                <TransitioningContentControl Content="{Binding CurrentView}" Margin="0,40,0,0"/>
+            </SplitView.Content>
+        </SplitView>
         
-        <SplitView.Pane>
-            <Grid RowDefinitions="Auto, *">
-                <Button Command="{Binding TogglePaneCommand}"
-                        HorizontalAlignment="Left"
-                        Width="50" Height="50"
-                        Background="Transparent"
-                        Margin="0,10,0,0">
-                    <icons:MaterialIcon Kind="Menu" Width="24" Height="24" Foreground="#333"/>
-                </Button>
-
-                <StackPanel Grid.Row="1" Margin="0,20,0,0" Spacing="5">
-                    <!-- Patient Menu Item -->
-                    <Button Command="{Binding GoToPatientsCommand}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="12"
-                            Background="Transparent"
-                            BorderThickness="0">
-                        <Grid ColumnDefinitions="30, *">
-                            <!-- <icons:MaterialIcon Kind="AccountMultiple" Width="24" Height="24" Foreground="#555"/> -->
-                            <TextBlock Text="👤" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="Bệnh Nhân" VerticalAlignment="Center" Margin="10,0,0,0"
-                                       IsVisible="{Binding IsPaneOpen}" FontWeight="Medium"/>
-                        </Grid>
-                    </Button>
-
-                    <!-- Measurement Menu Item -->
-                    <Button Command="{Binding GoToMeasurementCommand}"
-                            HorizontalAlignment="Stretch"
-                            HorizontalContentAlignment="Left"
-                            Padding="12"
-                            Background="Transparent"
-                            BorderThickness="0">
-                        <Grid ColumnDefinitions="30, *">
-                            <!-- <icons:MaterialIcon Kind="ChartLine" Width="24" Height="24" Foreground="#555"/> -->
-                            <TextBlock Text="📈" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <TextBlock Grid.Column="1" Text="Đo Đạc &amp; Đồ Thị" VerticalAlignment="Center" Margin="10,0,0,0"
-                                       IsVisible="{Binding IsPaneOpen}" FontWeight="Medium"/>
-                        </Grid>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </SplitView.Pane>
-
-        <SplitView.Content>
-            <TransitioningContentControl Content="{Binding CurrentView}" Margin="20"/>
-        </SplitView.Content>
-    </SplitView>
+        <!-- Window Title (Centered) -->
+        <TextBlock Grid.Row="0" Text="{Binding $parent[Window].Title}" 
+                   VerticalAlignment="Center" HorizontalAlignment="Center" 
+                   IsHitTestVisible="False"
+                   FontSize="12"
+                   Foreground="#808080"/>
+    </Grid>
 
 </Window>

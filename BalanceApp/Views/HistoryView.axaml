@@ -4,52 +4,60 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:BalanceApp.ViewModels"
              xmlns:sp="clr-namespace:ScottPlot.Avalonia;assembly=ScottPlot.Avalonia"
+             xmlns:icons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
              x:Class="BalanceApp.Views.HistoryView"
              x:DataType="vm:HistoryViewModel">
 
-    <Grid RowDefinitions="Auto, *">
+    <Grid Classes="Page" RowDefinitions="Auto, *">
         <!-- Header -->
-        <Border Grid.Row="0" Background="#f0f0f0" Padding="15" BorderBrush="#ddd" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" Spacing="20">
-                <Button Command="{Binding GoBackCommand}" Content="← Quay Lại" Width="100"/>
-                <TextBlock Text="{Binding PatientName, StringFormat='Lịch Sử Đo: {0}'}" 
-                           FontSize="20" FontWeight="Bold" VerticalAlignment="Center"/>
-            </StackPanel>
-        </Border>
+        <StackPanel Orientation="Horizontal" Spacing="20" Margin="0,0,0,20">
+             <Button Command="{Binding GoBackCommand}" Background="Transparent" BorderThickness="0" Padding="0">
+                 <icons:MaterialIcon Kind="ArrowLeft" Width="24" Height="24" Foreground="#333"/>
+             </Button>
+             <TextBlock Text="{Binding PatientName, StringFormat='Lịch Sử: {0}'}" Classes="PageHeader" Margin="0" VerticalAlignment="Center"/>
+        </StackPanel>
 
         <!-- Content Split View -->
         <Grid Grid.Row="1" ColumnDefinitions="300, *">
             
-            <!-- Left: Session List -->
-            <Border Grid.Column="0" BorderBrush="#ddd" BorderThickness="0,0,1,0" Background="#fafafa">
-                <ListBox ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="5">
-                                <TextBlock Text="{Binding TestDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="Gray" TextTrimming="CharacterEllipsis"/>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
+            <!-- Left: Session List (Card) -->
+            <Border Grid.Column="0" Classes="Card" Margin="0,0,16,0" Padding="0">
+                <Grid RowDefinitions="Auto, *">
+                    <TextBlock Text="Các Buổi Đo" Classes="SectionHeader" Margin="16,16,0,10"/>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding Sessions}" SelectedItem="{Binding SelectedSession}" Background="Transparent">
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Padding" Value="16,12"/>
+                                <Setter Property="CornerRadius" Value="4"/>
+                                <Setter Property="Margin" Value="8,2"/>
+                            </Style>
+                        </ListBox.Styles>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="{Binding TestDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding Notes}" FontSize="12" Foreground="#808080" TextTrimming="CharacterEllipsis"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
             </Border>
 
-            <!-- Right: Graph Detail -->
-            <Grid Grid.Column="1" Background="White">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <!-- Right: Graph Detail (Card) -->
+            <Border Grid.Column="1" Classes="Card">
+                <Grid RowDefinitions="Auto, *">
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" Margin="0,0,0,16">
+                        <TextBlock Text="Chi Tiết Buổi Đo" Classes="SectionHeader" Margin="0"/>
+                        <TextBlock Text="{Binding SelectedSession.TestDate, StringFormat='Ngày: {0:dd/MM/yyyy HH:mm}'}" 
+                                   VerticalAlignment="Bottom" Foreground="#606060"
+                                   IsVisible="{Binding SelectedSession, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                    </StackPanel>
 
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="20" Margin="10">
-                    <TextBlock Text="Chi Tiết Buổi Đo" FontSize="16" FontWeight="SemiBold"/>
-                    <TextBlock Text="{Binding SelectedSession.TestDate, StringFormat='Ngày: {0:dd/MM/yyyy HH:mm}'}" 
-                               IsVisible="{Binding SelectedSession, Converter={x:Static ObjectConverters.IsNotNull}}"/>
-                </StackPanel>
-
-                <sp:AvaPlot Name="HistoryPlot" Grid.Row="1"/>
-            </Grid>
+                    <sp:AvaPlot Name="HistoryPlot" Grid.Row="1"/>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>

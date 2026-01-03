@@ -3,12 +3,30 @@ using System;
 using System.Linq;
 using ScottPlot;
 using ScottPlot.Plottables;
+using ScottPlot.DataSources;
 using BalanceApp.ViewModels;
+using System.Collections.Generic;
+using Avalonia.Threading;
 
 namespace BalanceApp.Views;
 
 public partial class MeasurementView : UserControl
 {
+    private Scatter _historyPlot;
+    private Scatter _activePlot;
+    private Marker _currentHead;
+    
+    // Data buffers
+    // ScottPlot sẽ "nhìn" trực tiếp vào 4 cái List này để vẽ
+    private readonly List<double> _historyX = new();
+    private readonly List<double> _historyY = new();
+    
+    private readonly List<double> _activeX = new();
+    private readonly List<double> _activeY = new();
+    
+    private MeasurementViewModel? _viewModel;
+    private readonly object _lock = new();
+
     public MeasurementView()
     {
         InitializeComponent();
@@ -27,15 +45,18 @@ public partial class MeasurementView : UserControl
         plot.Add.Line(0, -15, 0, 15);
         plot.Add.Line(-15, 0, 15, 0);
 
-        // 1. History Plot (Faded, background)
-        _historyPlot = plot.Add.Scatter(Array.Empty<double>(), Array.Empty<double>());
+        // --- SỬA ĐOẠN 1: LIÊN KẾT LIST VÀO BIỂU ĐỒ ---
+
+        // 1. History Plot (Faded)
+        // Truyền trực tiếp biến _historyX, _historyY vào hàm Add.Scatter
+        _historyPlot = plot.Add.Scatter(_historyX, _historyY);
         _historyPlot.MarkerSize = 3;
-        _historyPlot.Color = Colors.Gray.WithOpacity(0.3); // Faded
-        _historyPlot.LineWidth = 0; // No lines for history to reduce clutter? Or faint line? Let's use faint line
+        _historyPlot.Color = Colors.Gray.WithOpacity(0.3);
         _historyPlot.LineWidth = 1;
 
-        // 2. Active Plot (Recent 30 pts, Bold Black)
-        _activePlot = plot.Add.Scatter(Array.Empty<double>(), Array.Empty<double>());
+        // 2. Active Plot (Recent)
+        // Truyền trực tiếp biến _activeX, _activeY vào hàm Add.Scatter
+        _activePlot = plot.Add.Scatter(_activeX, _activeY);
         _activePlot.MarkerSize = 5;
         _activePlot.Color = Colors.Black;
         _activePlot.LineWidth = 2; // Connected lines
@@ -46,16 +67,6 @@ public partial class MeasurementView : UserControl
         _currentHead.Size = 10;
         _currentHead.Shape = MarkerShape.FilledCircle;
     }
-
-    private Scatter? _historyPlot;
-    private Scatter? _activePlot;
-    private Marker? _currentHead;
-    
-    private readonly System.Collections.Generic.List<(double X, double Y)> _historyPoints = new();
-    private readonly System.Collections.Generic.Queue<(double X, double Y)> _activeQueue = new();
-    private const int MaxActiveLength = 30;
-
-    private MeasurementViewModel? _viewModel;
 
     protected override void OnDataContextChanged(EventArgs e)
     {
@@ -69,76 +80,51 @@ public partial class MeasurementView : UserControl
 
     private void OnGraphUpdate(Services.Sensor.SensorData data)
     {
-        Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+        Dispatcher.UIThread.InvokeAsync(() =>
         {
-            // Reset signal
-            if (data == null)
+            lock (_lock)
             {
-                _historyPoints.Clear();
-                _activeQueue.Clear();
-                UpdatePlots();
-                return;
+                // Reset signal
+                if (data == null)
+                {
+                    _historyX.Clear();
+                    _historyY.Clear();
+                    _activeX.Clear();
+                    _activeY.Clear();
+                    
+                    // --- SỬA ĐOẠN 2: BỎ LỆNH GÁN .DATA ---
+                    // Chỉ cần Refresh là nó tự nhận diện List rỗng
+                    BalancePlot.Refresh();
+                    return;
+                }
+
+                // Update Head
+                _currentHead.X = data.X;
+                _currentHead.Y = data.Y;
+
+                // Add to Active buffer
+                _activeX.Add(data.X);
+                _activeY.Add(data.Y);
+
+                // If Active full, move oldest to History
+                if (_activeX.Count > 30) // MaxActiveLength
+                {
+                    double oldX = _activeX[0];
+                    double oldY = _activeY[0];
+                    
+                    _activeX.RemoveAt(0);
+                    _activeY.RemoveAt(0);
+                    
+                    _historyX.Add(oldX);
+                    _historyY.Add(oldY);
+                }
+
+                // --- SỬA ĐOẠN 3: BỎ LỆNH GÁN .DATA ---
+                // Không cần làm gì cả vì List đã thay đổi ở trên
+
+                // Refresh để vẽ lại theo dữ liệu mới trong List
+                BalancePlot.Refresh();
             }
-
-            if (_activePlot == null || _historyPlot == null || _currentHead == null) return;
-
-            // Update Head
-            _currentHead.X = data.X;
-            _currentHead.Y = data.Y;
-
-            // Logic: Add to Active Queue
-            _activeQueue.Enqueue((data.X, data.Y));
-
-            // If Active Queue full, move oldest to History
-            if (_activeQueue.Count > MaxActiveLength)
-            {
-                var old = _activeQueue.Dequeue();
-                _historyPoints.Add(old);
-            }
-
-            // Redraw
-            UpdatePlots();
         });
-    }
-
-    private void UpdatePlots()
-    {
-        if (_activePlot != null) BalancePlot.Plot.Remove(_activePlot);
-        if (_historyPlot != null) BalancePlot.Plot.Remove(_historyPlot);
-
-        // Update History
-        if (_historyPoints.Any())
-        {
-            var hXs = _historyPoints.Select(p => p.X).ToArray();
-            var hYs = _historyPoints.Select(p => p.Y).ToArray();
-            _historyPlot = BalancePlot.Plot.Add.Scatter(hXs, hYs);
-            _historyPlot.MarkerSize = 3;
-            _historyPlot.Color = Colors.Gray.WithOpacity(0.3);
-            _historyPlot.LineWidth = 1;
-        }
-
-        // Update Active
-        if (_activeQueue.Any())
-        {
-            var activeArr = _activeQueue.ToArray();
-            var aXs = activeArr.Select(p => p.X).ToArray();
-            var aYs = activeArr.Select(p => p.Y).ToArray();
-            _activePlot = BalancePlot.Plot.Add.Scatter(aXs, aYs);
-            _activePlot.MarkerSize = 5;
-            _activePlot.Color = Colors.Black;
-            _activePlot.LineWidth = 2;
-        }
-        
-        // Ensure Head is on top
-        if (_currentHead != null)
-        {
-            BalancePlot.Plot.Remove(_currentHead);
-            _currentHead = BalancePlot.Plot.Add.Marker(_currentHead.X, _currentHead.Y);
-            _currentHead.Color = Colors.Black;
-            _currentHead.Size = 10;
-            _currentHead.Shape = MarkerShape.FilledCircle;
-        }
-        
-        BalancePlot.Refresh();
     }
 }
