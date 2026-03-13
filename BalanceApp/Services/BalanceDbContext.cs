@@ -14,7 +14,9 @@ namespace BalanceApp.Services
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             // Use SQL Server Express instance as requested
-            optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=BalanceAppDB_v2;Trusted_Connection=True;TrustServerCertificate=True;");
+            // Use SQLite for Linux compatibility
+            optionsBuilder.UseSqlite("Data Source=BalanceApp.db");
+            // optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS;Database=BalanceAppDB_v2;Trusted_Connection=True;TrustServerCertificate=True;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

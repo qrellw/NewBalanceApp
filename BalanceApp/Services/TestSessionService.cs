@@ -44,4 +44,14 @@ public class TestSessionService
             .OrderByDescending(s => s.TestDate)
             .ToListAsync();
     }
+
+    public async Task DeleteSessionAsync(int sessionId)
+    {
+        var session = await _context.TestSessions.FindAsync(sessionId);
+        if (session != null)
+        {
+            _context.TestSessions.Remove(session);
+            await _context.SaveChangesAsync();
+        }
+    }
 }

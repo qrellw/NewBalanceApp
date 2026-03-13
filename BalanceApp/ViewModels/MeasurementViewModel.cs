@@ -103,54 +103,24 @@ public partial class MeasurementViewModel : ViewModelBase
     }
     
     // Simulation Logic
-    private DispatcherTimer? _simTimer;
+    [ObservableProperty]
     private bool _isSimulating;
-    private double _simAngle = 0;
 
-    [RelayCommand]
-    private void ToggleSimulation()
+    partial void OnIsSimulatingChanged(bool value)
     {
-        if (_isSimulating)
-        {
-            _simTimer?.Stop();
-            _isSimulating = false;
-            ConnectionStatus = "Đã dừng giả lập";
-        }
-        else
-        {
-            _isSimulating = true;
-            ConnectionStatus = "Đang giả lập dữ liệu...";
-            _simTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(20) }; // 50Hz
-            _simTimer.Tick += (s, e) =>
-            {
-                _simAngle += 0.1;
-                // Generate fake circular motion
-                var x = Math.Sin(_simAngle) * 5; 
-                var y = Math.Cos(_simAngle) * 5;
-                
-                // Add some noise
-                var rnd = new Random();
-                x += (rnd.NextDouble() - 0.5);
-                y += (rnd.NextDouble() - 0.5);
-
-                var fakeData = new SensorData 
-                { 
-                    X = (float)x, 
-                    Y = (float)y,
-                    Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds()
-                };
-                
-                // Directly pipe to handler
-                OnDataReceived(fakeData);
-            };
-            _simTimer.Start();
-        }
+        _sensorService.ToggleSimulation(value);
+        // Status updates (including "Connected (Fake)") come from OnStatusChanged event in Service
     }
+    
+    // ...
+    // Removed local _simTimer and _simAngle as Service handles it now.
 
     public event Action<SensorData>? UpdateGraphAction;
 
     private void OnDataReceived(SensorData data)
     {
+        Console.WriteLine($"[ViewModel] Received: {data.X:F2}");
+        
         // Offload to View's Code-behind via event to keep ViewModel clean of UI dependencies
         UpdateGraphAction?.Invoke(data);
 
@@ -187,7 +157,9 @@ public partial class MeasurementViewModel : ViewModelBase
     private void StartMeasurement()
     {
         if (CurrentPatient == null) return;
-        if (!_sensorService.IsConnected)
+        
+        // Check Connection OR Simulation explicitly as fallback
+        if (!_sensorService.IsConnected && !IsSimulating)
         {
              ConnectionStatus = "Vui lòng kết nối cảm biến trước!";
              return;
@@ -200,7 +172,6 @@ public partial class MeasurementViewModel : ViewModelBase
         UpdateGraphAction?.Invoke(null!); 
 
         ActionButtonText = "DỪNG ĐO";
-        // Timer removed, user manually stops
     }
 
     private async Task StopMeasurement()

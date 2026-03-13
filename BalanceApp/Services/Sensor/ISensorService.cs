@@ -20,8 +20,12 @@ public class SensorData
 public interface ISensorService
 {
     bool IsConnected { get; }
+    bool IsSimulationMode { get; } // New property
+
     event Action<SensorData>? DataReceived;
     event Action<string>? StatusChanged;
+
+    void ToggleSimulation(bool enable); // New method
 
     void Connect(string connectionString); // COM port or "WIFI"
     Task<bool> ScanAndConnectAsync(); // Auto-detect

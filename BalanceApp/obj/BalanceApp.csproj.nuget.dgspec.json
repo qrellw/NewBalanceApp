@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Code\\NewBalanceApp\\BalanceApp\\BalanceApp.csproj": {}
+    "/home/hungtran/data_win/Code/NewBalanceApp/BalanceApp/BalanceApp.csproj": {}
   },
   "projects": {
-    "D:\\Code\\NewBalanceApp\\BalanceApp\\BalanceApp.csproj": {
+    "/home/hungtran/data_win/Code/NewBalanceApp/BalanceApp/BalanceApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Code\\NewBalanceApp\\BalanceApp\\BalanceApp.csproj",
+        "projectUniqueName": "/home/hungtran/data_win/Code/NewBalanceApp/BalanceApp/BalanceApp.csproj",
         "projectName": "BalanceApp",
-        "projectPath": "D:\\Code\\NewBalanceApp\\BalanceApp\\BalanceApp.csproj",
-        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-        "outputPath": "D:\\Code\\NewBalanceApp\\BalanceApp\\obj\\",
+        "projectPath": "/home/hungtran/data_win/Code/NewBalanceApp/BalanceApp/BalanceApp.csproj",
+        "packagesPath": "/home/hungtran/.nuget/packages/",
+        "outputPath": "/home/hungtran/data_win/Code/NewBalanceApp/BalanceApp/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/home/hungtran/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -88,6 +86,10 @@
               "target": "Package",
               "version": "[9.0.0, )"
             },
+            "Microsoft.EntityFrameworkCore.Sqlite": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "ScottPlot.Avalonia": {
               "target": "Package",
               "version": "[5.1.57, )"
@@ -114,15 +116,11 @@
               "version": "[9.0.11, 9.0.11]"
             },
             {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "name": "Microsoft.NETCore.App.Host.linux-x64",
               "version": "[9.0.11, 9.0.11]"
             },
             {
               "name": "Microsoft.NETCore.App.Ref",
-              "version": "[9.0.11, 9.0.11]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
               "version": "[9.0.11, 9.0.11]"
             }
           ],
@@ -131,7 +129,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.100/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

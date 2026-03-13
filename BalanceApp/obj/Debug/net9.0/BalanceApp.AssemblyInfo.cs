@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BalanceApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+35e782b6f80fcfcbcbb3329439b6eb62973ae111")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4c1068f5f9318153b1b158018d7d52da17d666bd")]
 [assembly: System.Reflection.AssemblyProductAttribute("BalanceApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BalanceApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

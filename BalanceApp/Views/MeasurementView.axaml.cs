@@ -41,9 +41,14 @@ public partial class MeasurementView : UserControl
         // Grid
         plot.Grid.MajorLineColor = Colors.LightGray.WithOpacity(0.5);
         
-        // Crosshair
-        plot.Add.Line(0, -15, 0, 15);
-        plot.Add.Line(-15, 0, 15, 0);
+        // Crosshair (Infinite, Black)
+        var vLine = plot.Add.VerticalLine(0);
+        vLine.Color = Colors.Black;
+        vLine.LineWidth = 1;
+
+        var hLine = plot.Add.HorizontalLine(0);
+        hLine.Color = Colors.Black;
+        hLine.LineWidth = 1;
 
         // --- SỬA ĐOẠN 1: LIÊN KẾT LIST VÀO BIỂU ĐỒ ---
 
@@ -80,6 +85,7 @@ public partial class MeasurementView : UserControl
 
     private void OnGraphUpdate(Services.Sensor.SensorData data)
     {
+        Console.WriteLine($"[View] OnGraphUpdate: {data?.X}");
         Dispatcher.UIThread.InvokeAsync(() =>
         {
             lock (_lock)
@@ -92,15 +98,16 @@ public partial class MeasurementView : UserControl
                     _activeX.Clear();
                     _activeY.Clear();
                     
-                    // --- SỬA ĐOẠN 2: BỎ LỆNH GÁN .DATA ---
-                    // Chỉ cần Refresh là nó tự nhận diện List rỗng
+                    // Force refresh to show cleared graph
+                    BalancePlot.Plot.Axes.SetLimits(-25, 25, -25, 25);
                     BalancePlot.Refresh();
                     return;
                 }
 
-                // Update Head
+                // Update Head Position
                 _currentHead.X = data.X;
                 _currentHead.Y = data.Y;
+                _currentHead.IsVisible = true;
 
                 // Add to Active buffer
                 _activeX.Add(data.X);
@@ -117,12 +124,16 @@ public partial class MeasurementView : UserControl
                     
                     _historyX.Add(oldX);
                     _historyY.Add(oldY);
+                    
+                    // Optional: Limit history size to prevent memory leak
+                     if (_historyX.Count > 1000)
+                     {
+                         _historyX.RemoveAt(0);
+                         _historyY.RemoveAt(0);
+                     }
                 }
-
-                // --- SỬA ĐOẠN 3: BỎ LỆNH GÁN .DATA ---
-                // Không cần làm gì cả vì List đã thay đổi ở trên
-
-                // Refresh để vẽ lại theo dữ liệu mới trong List
+                
+                // Trigger Render
                 BalancePlot.Refresh();
             }
         });

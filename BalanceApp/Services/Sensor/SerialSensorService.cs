@@ -16,10 +16,82 @@ public class SerialSensorService : ISensorService
     public event Action<SensorData>? DataReceived;
     public event Action<string>? StatusChanged;
 
-    public bool IsConnected => _serialPort != null && _serialPort.IsOpen;
+    public bool IsSimulationMode { get; private set; }
+    
+    // Timer for simulation
+    private Timer? _simulationTimer;
+    private double _simAngle;
+
+    // Update IsConnected to be true if Serial is open OR Simulation is running
+    public bool IsConnected => (_serialPort != null && _serialPort.IsOpen) || IsSimulationMode;
+
+    public void ToggleSimulation(bool enable)
+    {
+        if (enable == IsSimulationMode) return;
+
+        IsSimulationMode = enable;
+
+        if (enable)
+        {
+            // Stop any real connection if exists (optional, or we can allow parallel but for now let's be exclusive)
+            Disconnect();
+            
+            // Start Simulation
+            _simAngle = 0;
+            _simX = 0;
+            _simY = 0;
+            _simulationTimer = new Timer(SimulationTick, null, 0, 20); // 50Hz (20ms)
+            StatusChanged?.Invoke("Đã kết nối (Giả lập)");
+        }
+        else
+        {
+            // Stop Simulation
+            _simulationTimer?.Dispose();
+            _simulationTimer = null;
+            StatusChanged?.Invoke("Đã dừng chế độ giả lập");
+        }
+    }
+
+    private float _simX = 0;
+    private float _simY = 0;
+    private readonly Random _random = new Random();
+
+    private void SimulationTick(object? state)
+    {
+        if (!IsSimulationMode) return;
+
+        // chaotic Random Walk
+        // Increase step size and reduce damping slightly to make it wander more
+        _simX += (float)(_random.NextDouble() - 0.5) * 3.0f; // Step size increased from 1.5 to 3.0
+        _simY += (float)(_random.NextDouble() - 0.5) * 3.0f;
+        
+        // Constrain to "Device Board" area (roughly -15 to 15 cm)
+        // Damping: 0.99 allows more wander than 0.98
+        _simX = Math.Clamp(_simX * 0.99f, -15, 15);
+        _simY = Math.Clamp(_simY * 0.99f, -15, 15);
+
+        // Add some noise to forces so they aren't static
+        var fakeData = new SensorData
+        {
+            Timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+            X = _simX,
+            Y = _simY,
+            Force1 = 10 + (float)_random.NextDouble() * 5.0f, // Range 10-15
+            Force2 = 10 + (float)_random.NextDouble() * 5.0f, 
+            Force3 = 10 + (float)_random.NextDouble() * 5.0f, 
+            Force4 = 10 + (float)_random.NextDouble() * 5.0f
+        };
+        
+        Console.WriteLine($"[Service] Tick: {fakeData.X:F2}, {fakeData.Y:F2}"); 
+        DataReceived?.Invoke(fakeData);
+    }
 
     public void Connect(string portName)
     {
+        // If simulating, stop it first? Or block? 
+        // Let's stop simulation if we try to connect real device
+        if (IsSimulationMode) ToggleSimulation(false);
+
         Disconnect();
 
         try
@@ -43,6 +115,9 @@ public class SerialSensorService : ISensorService
 
     public void Disconnect()
     {
+        // If simulating, stop it
+        if (IsSimulationMode) ToggleSimulation(false);
+
         _keepReading = false;
         if (_readThread != null && _readThread.IsAlive)
         {
@@ -65,6 +140,8 @@ public class SerialSensorService : ISensorService
 
     public async Task<bool> ScanAndConnectAsync()
     {
+        if (IsSimulationMode) ToggleSimulation(false); // Stop sim before scanning
+        
         Disconnect();
         StatusChanged?.Invoke("Đang quét thiết bị...");
 

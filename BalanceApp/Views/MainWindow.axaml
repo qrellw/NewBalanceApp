@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="1000" d:DesignHeight="600"
         x:Class="BalanceApp.Views.MainWindow"
         x:DataType="vm:MainViewModel"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/icon_app.ico"
         Title="BalanceApp"
         Background="{StaticResource AppBackgroundBrush}"
         ExtendClientAreaToDecorationsHint="True"

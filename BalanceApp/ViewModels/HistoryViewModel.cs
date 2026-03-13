@@ -49,6 +49,32 @@ public partial class HistoryViewModel : ViewModelBase
         _mainViewModel.CurrentView = _mainViewModel.PatientVM;
     }
 
+    [RelayCommand]
+    private async Task DeleteSession(TestSession? session)
+    {
+        if (session == null) return;
+
+        try
+        {
+            await _sessionService.DeleteSessionAsync(session.SessionId);
+            
+            // UI Update
+            Sessions.Remove(session);
+            
+            // If deleted session was selected, clear selection
+            if (SelectedSession == session)
+            {
+                SelectedSession = null;
+                SessionSelected?.Invoke(null!);
+            }
+        }
+        catch (Exception ex)
+        {
+             // Ideally show error dialog
+             Console.WriteLine("Error deleting session: " + ex.Message);
+        }
+    }
+
     // Event to notify View to redraw graph
     public event Action<TestSession>? SessionSelected;
 

@@ -8,6 +8,7 @@
         x:Class="BalanceApp.Views.AddPatientWindow"
         x:DataType="vm:PatientViewModel"
         Title="Thêm Bệnh Nhân Mới"
+        Icon="/Assets/icon_app.ico"
         WindowStartupLocation="CenterOwner"
         CanResize="False">
     
